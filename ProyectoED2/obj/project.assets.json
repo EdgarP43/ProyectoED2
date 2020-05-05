@@ -13031,11 +13031,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Edgar\\source\\repos\\ProyectoED2\\ProyectoED2\\ProyectoED2.csproj",
+      "projectUniqueName": "C:\\Users\\Edgar\\Desktop\\Compresion\\ProyectoED2\\ProyectoED2.csproj",
       "projectName": "ProyectoED2",
-      "projectPath": "C:\\Users\\Edgar\\source\\repos\\ProyectoED2\\ProyectoED2\\ProyectoED2.csproj",
+      "projectPath": "C:\\Users\\Edgar\\Desktop\\Compresion\\ProyectoED2\\ProyectoED2.csproj",
       "packagesPath": "C:\\Users\\Edgar\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Edgar\\source\\repos\\ProyectoED2\\ProyectoED2\\obj\\",
+      "outputPath": "C:\\Users\\Edgar\\Desktop\\Compresion\\ProyectoED2\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
