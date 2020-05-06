@@ -198,5 +198,32 @@ namespace ProyectoED2.Cifrado
                 }
             }
         }
+
+        public string CrearArchivos(string rutaOriginal)
+        {
+            var vec1 = rutaOriginal.Split("\\");
+            var vec2 = vec1[vec1.Length - 1].Split(".");
+            var destino = Path.GetFullPath("bin");
+            using (var arch = new FileStream(rutaOriginal, FileMode.OpenOrCreate))
+            {
+                using (var reader = new StreamReader(arch))
+                {
+                    using (var archNuevo = new FileStream(destino.Substring(0, destino.Length - 3) + vec1[vec1.Length - 1], FileMode.OpenOrCreate))
+                    {
+                        using (var writer = new StreamWriter(archNuevo))
+                        {
+                            writer.Write(reader.ReadToEnd());
+                        }
+                    }
+                }
+            }
+            return destino.Substring(0, destino.Length - 3) + vec1[vec1.Length - 1];
+        }
+        public void CargarArchivos(string ruta)
+        {
+            FileInfo fi = new FileInfo(ruta);
+            fi.Delete();
+        }
+
     }
 }
