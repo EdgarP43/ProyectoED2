@@ -12995,11 +12995,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Escritorio\\ProyectoEDII\\ProyectoED2\\ProyectoED2.csproj",
+      "projectUniqueName": "D:\\Escritorio\\ProyectoED2\\ProyectoED2\\ProyectoED2.csproj",
       "projectName": "ProyectoED2",
-      "projectPath": "D:\\Escritorio\\ProyectoEDII\\ProyectoED2\\ProyectoED2.csproj",
+      "projectPath": "D:\\Escritorio\\ProyectoED2\\ProyectoED2\\ProyectoED2.csproj",
       "packagesPath": "C:\\Users\\Azurdia\\.nuget\\packages\\",
-      "outputPath": "D:\\Escritorio\\ProyectoEDII\\ProyectoED2\\obj\\",
+      "outputPath": "D:\\Escritorio\\ProyectoED2\\ProyectoED2\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
