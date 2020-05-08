@@ -407,15 +407,14 @@ namespace ProyectoED2.ArbolBStar
             actual.estaLleno = false;
             this.raiz = nuevaRaiz;
         }
-        public Producto Busqueda(int id)
+        public bool Busqueda(int id)
         {
             Producto resultado = BuscarCompa(raiz, id);
             if (resultado != null)
             {
-                return null;
+               return true;
             }
-            return resultado;
-
+            return false;
         }
         private Producto BuscarCompa(NodoP actual, int idB)
         {

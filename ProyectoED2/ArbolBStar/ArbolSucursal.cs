@@ -407,14 +407,14 @@ namespace ProyectoED2.ArbolBStar
             actual.estaLleno = false;
             this.raiz = nuevaRaiz;
         }
-        public Sucursal Busqueda(int id)
+        public bool Busqueda(int id)
         {
             Sucursal resultado = BuscarCompa(raiz, id);
             if (resultado != null)
             {
-                return null;
+                return true;
             }
-            return resultado;
+            return false;
 
         }
         private Sucursal BuscarCompa(NodoS actual, int idB)

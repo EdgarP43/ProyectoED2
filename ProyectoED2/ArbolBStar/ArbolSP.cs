@@ -408,17 +408,17 @@ namespace ProyectoED2.ArbolBStar
             actual.estaLleno = false;
             this.raiz = nuevaRaiz;
         }
-        public SucursalPrecio Busqueda(int idSucursal)
+        public bool Busqueda(int idSucursal, int idProcuto)
         {
-            SucursalPrecio resultado = BuscarCompa(raiz, idSucursal);
+            SucursalPrecio resultado = BuscarCompa(raiz, idSucursal, idProcuto);
             if (resultado != null)
             {
-                return null;
+                return true;
             }
-            return resultado;
+            return false;
 
         }
-        private SucursalPrecio BuscarCompa(NodoSP actual, int idSucursalB)
+        private SucursalPrecio BuscarCompa(NodoSP actual, int idSucursalB, int idProcuto)
         {
             NodoSP temporal = actual;
 
@@ -427,7 +427,7 @@ namespace ProyectoED2.ArbolBStar
             {
                 i++;
             }
-            if (i <= actual.tamaño - 1 && idSucursalB == actual.Llaves[i].idSucursal)
+            if (i <= actual.tamaño - 1 && idSucursalB == actual.Llaves[i].idSucursal && idProcuto == actual.Llaves[i].idProducto)
             {
                 return actual.Llaves[i];
             }
@@ -437,12 +437,13 @@ namespace ProyectoED2.ArbolBStar
             }
             else
             {
-                return BuscarCompa(actual.hijos[i], idSucursalB);
+                return BuscarCompa(actual.hijos[i], idSucursalB, idProcuto);
             }
         }
         public List<SucursalPrecio> Todo()
         {
             var listaTodo = Mostrar(raiz);
+
             return listaTodo;
         }
         private List<SucursalPrecio> Mostrar(NodoSP nodo)
