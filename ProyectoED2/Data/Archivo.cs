@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ProyectoED2.Modelos;
+using ProyectoED2.ArbolBStar;
 using System.IO;
 
 namespace ProyectoED2.Data
@@ -12,11 +13,11 @@ namespace ProyectoED2.Data
         public string d1 = "";
         public string d2 = "";
         public string d3 = "";
-        public List<Sucursal> sucursales = new List<Sucursal>();
+        public ArbolProducto productos = new ArbolProducto(9);
+        public ArbolSucursal sucursales = new ArbolSucursal(9);
+        public ArbolSP inventario = new ArbolSP(9);
         public List<string> idSucursal = new List<string>();
-        public List<Producto> productos = new List<Producto>();
         public List<string> idProductos = new List<string>();
-        public List<SucursalPrecio> inventario = new List<SucursalPrecio>();
         public void insertarSucursal(Sucursal nueva)
         {
             string escribir = nueva.id.ToString() + "," + nueva.nombre + "," + nueva.direccion;
@@ -24,7 +25,7 @@ namespace ProyectoED2.Data
             {
                 sw.WriteLine(escribir);
             }
-            sucursales.Add(nueva);
+            sucursales.Insertar(nueva);
             idSucursal.Add(nueva.id.ToString());
         }
         public void insertarProducto(Producto nueva)
@@ -34,7 +35,7 @@ namespace ProyectoED2.Data
             {
                 sw.WriteLine(escribir);
             }
-            productos.Add(nueva);
+            productos.Insertar(nueva);
             idProductos.Add(nueva.id.ToString());
         }
         public void insertarSyP(SucursalPrecio nueva)
@@ -44,7 +45,7 @@ namespace ProyectoED2.Data
             {
                 sw.WriteLine(escribir);
             }
-            inventario.Add(nueva);
+            inventario.Insertar(nueva);
         }
         public void leerSucursales(string direccion)
         {
@@ -58,7 +59,7 @@ namespace ProyectoED2.Data
                     creado.id = Convert.ToInt32(sucursal[0]);
                     creado.nombre = sucursal[1];
                     creado.direccion = sucursal[2];
-                    sucursales.Add(creado);
+                    sucursales.Insertar(creado);
                 }
             }
         }
@@ -74,7 +75,7 @@ namespace ProyectoED2.Data
                     creado.id = Convert.ToInt32(sucursal[0]);
                     creado.nombre = sucursal[1];
                     creado.precio = Convert.ToDouble(sucursal[2]);
-                    productos.Add(creado);
+                    productos.Insertar(creado);
 
                 }
             }
@@ -92,7 +93,7 @@ namespace ProyectoED2.Data
                     creado.idSucursal = Convert.ToInt32(sucursal[0]);
                     creado.idProducto = Convert.ToInt32(sucursal[1]);
                     creado.cantidadInv = Convert.ToInt32(sucursal[2]);
-                    inventario.Add(creado);
+                    inventario.Insertar(creado);
                 }
             }
         }
