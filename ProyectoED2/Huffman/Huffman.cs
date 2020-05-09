@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web;
+using ProyectoED2.Data;
 
 namespace ProyectoED2.Huffman
 {
@@ -25,10 +26,9 @@ namespace ProyectoED2.Huffman
         public Dictionary<string, Dictionary<byte, string>> CodigosPrefijo = new Dictionary<string, Dictionary<byte, string>>();
         public ArbolS Arbol = new ArbolS();
         public Dictionary<byte, string> CodigosPrefijoArchivoActual = new Dictionary<byte, string>();
-        public Dictionary<string, Archivo> DatosDeArchivos = new Dictionary<string, Archivo>();
         public Dictionary<string, byte> CodigoPD = new Dictionary<string, byte>();
         const int bufferLength = 1000;
-        public int CompresiónHuffman(string path, string[] nombreArchivo, string pathHuffman, string NombreNuevo)
+        public int CompresiónHuffman(string path, string[] nombreArchivo, string pathHuffman)
         {
             var ListaNodos = new List<Nodo>();
             var Frecuencias = new Dictionary<byte, int>();
@@ -107,7 +107,7 @@ namespace ProyectoED2.Huffman
             {
                 using (var reader = new BinaryReader(stream))
                 {
-                    using (var writeStream = new FileStream($"{pathHuffman}/{NombreNuevo}.huff", FileMode.OpenOrCreate))
+                    using (var writeStream = new FileStream($"{pathHuffman}/{nombreArchivo[0]}.huff", FileMode.OpenOrCreate))
                     {
                         using (var writer = new BinaryWriter(writeStream))
                         {
