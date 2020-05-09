@@ -13,17 +13,12 @@ namespace ProyectoED2.Data
         public string d1 = @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\producto.csv";
         public string d2 = @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal-producto.csv";
         public string d3 = @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal.csv";
-        //public Archivo()
-        //{
-        //    leerInventario(d2);
-        //    leerProductos(d1);
-        //    leerSucursales(d3);
-        //}
         public ArbolProducto productos = new ArbolProducto(9);
         public ArbolSucursal sucursales = new ArbolSucursal(9);
         public ArbolSP inventario = new ArbolSP(9);
-        public List<string> idSucursal = new List<string>();
-        public List<string> idProductos = new List<string>();
+        public List<Sucursal> rSucursal = new List<Sucursal>();
+        public List<Producto> rProductos = new List<Producto>();
+        public List<SucursalPrecio> rInventario = new List<SucursalPrecio>();
         public void insertarSucursal(Sucursal nueva)
         {
             string escribir = nueva.id.ToString() + "," + nueva.nombre + "," + nueva.direccion;
@@ -32,7 +27,7 @@ namespace ProyectoED2.Data
                 sw.WriteLine(escribir);
             }
             sucursales.Insertar(nueva);
-            idSucursal.Add(nueva.id.ToString());
+            rSucursal.Add(nueva);
         }
         public void insertarProducto(Producto nueva)
         {
@@ -42,7 +37,7 @@ namespace ProyectoED2.Data
                 sw.WriteLine(escribir);
             }
             productos.Insertar(nueva);
-            idProductos.Add(nueva.id.ToString());
+            rProductos.Add(nueva);
         }
         public void insertarSyP(SucursalPrecio nueva)
         {
@@ -103,58 +98,66 @@ namespace ProyectoED2.Data
                 }
             }
         }
-        //public void actualizarSucursales(Sucursal actualizar, string direccion)
-        //{
-        //    File.Delete(direccion);
-        //    using (StreamWriter sw1 = File.CreateText(direccion))
-        //        foreach (var item in sucursales)
-        //        {
-        //            if (item.id == actualizar.id)
-        //            {
-        //                item.nombre = actualizar.nombre;
-        //                item.direccion = actualizar.direccion;
-        //            }
-        //            using (StreamWriter sw = new StreamWriter(direccion))
-        //            {
-        //                sw.WriteLine(item.id.ToString() + "," + item.nombre + "," + item.direccion);
-        //            }
-        //        }
+        public void actualizarSucursales(Sucursal actualizar)
+        {
+            File.Delete(d3);
+            ArbolSucursal nuevo = new ArbolSucursal(9);
+            using (StreamWriter sw1 = File.CreateText(d3))
+            foreach (var item in rSucursal)
+            {
+                if (item.id == actualizar.id)
+                {
+                    item.nombre = actualizar.nombre;
+                    item.direccion = actualizar.direccion;
+                }
+                using (StreamWriter sw = new StreamWriter(d3))
+                {
+                   sw.WriteLine(item.id.ToString() + "," + item.nombre + "," + item.direccion);
+                }
+                    nuevo.Insertar(item);
+            }
+            sucursales.raiz = nuevo.raiz;
+        }
+        public void actualizarProducto(Producto actualizar)
+        {
+            File.Delete(d1);
+            ArbolProducto nuevo = new ArbolProducto(9);
+            using (StreamWriter sw1 = File.CreateText(d1))
+            foreach (var item in rProductos)
+            {
+                if (item.id == actualizar.id)
+                {
+                    item.nombre = actualizar.nombre;
+                    item.precio = actualizar.precio;
+                }
+                using (StreamWriter sw = new StreamWriter(d1))
+                {
+                    sw.WriteLine(item.id.ToString() + "," + item.nombre + "," + item.precio.ToString());
+                }
+                    nuevo.Insertar(item);
+            }
+            productos.raiz = nuevo.raiz;
 
-        //}
-        //public void actualizarProducto(Producto actualizar, string direccion)
-        //{
-        //    File.Delete(direccion);
-        //    using (StreamWriter sw1 = File.CreateText(direccion))
-        //        foreach (var item in productos)
-        //        {
-        //            if (item.id == actualizar.id)
-        //            {
-        //                item.nombre = actualizar.nombre;
-        //                item.precio = actualizar.precio;
-        //            }
-        //            using (StreamWriter sw = new StreamWriter(direccion))
-        //            {
-        //                sw.WriteLine(item.id.ToString() + "," + item.nombre + "," + item.precio.ToString());
-        //            }
-        //        }
+        }
+        public void actualizarInventarioQty(SucursalPrecio actualizar)
+        {
+            File.Delete(d2);
+            ArbolSP nuevo = new ArbolSP(9);
+            using (StreamWriter sw1 = File.CreateText(d2))
+            foreach (var item in rInventario)
+            {
+                if ((item.idSucursal == actualizar.idSucursal) && (item.idProducto == item.idProducto))
+                {
+                    item.cantidadInv += actualizar.cantidadInv;
+                }
+                using (StreamWriter sw = new StreamWriter(d2))
+                {
+                    sw.WriteLine(item.idSucursal.ToString() + "," + item.idProducto.ToString() + "," + item.cantidadInv.ToString());
+                }
+                nuevo.Insertar(item);
+            }
+            inventario.raiz = nuevo.raiz;
 
-        //}
-        //public void actualizarInventarioQty(SucursalPrecio actualizar, string direccion)
-        //{
-        //    File.Delete(direccion);
-        //    using (StreamWriter sw1 = File.CreateText(direccion))
-        //        foreach (var item in inventario)
-        //        {
-        //            if ((item.idSucursal == actualizar.idSucursal) && (item.idProducto == item.idProducto))
-        //            {
-        //                item.cantidadInv += actualizar.cantidadInv;
-        //            }
-        //            using (StreamWriter sw = new StreamWriter(direccion))
-        //            {
-        //                sw.WriteLine(item.idSucursal.ToString() + "," + item.idProducto.ToString() + "," + item.cantidadInv.ToString());
-        //            }
-        //        }
-
-        //}
+        }
     }
 }

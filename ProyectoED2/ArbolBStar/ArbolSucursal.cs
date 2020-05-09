@@ -8,7 +8,7 @@ namespace ProyectoED2.ArbolBStar
 {
     public class ArbolSucursal
     {
-        private NodoS raiz;
+        public NodoS raiz;
         private int tamanioMax;
         public List<Sucursal> contenidoArbol = new List<Sucursal>();
         public ArbolSucursal(int tamanioMax)

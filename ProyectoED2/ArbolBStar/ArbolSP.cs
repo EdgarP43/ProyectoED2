@@ -9,7 +9,7 @@ namespace ProyectoED2.ArbolBStar
 {
     public class ArbolSP
     {
-        private NodoSP raiz;
+        public NodoSP raiz;
         private int tamanioMax;
         public List<SucursalPrecio> contenidSucursaloArbol = new List<SucursalPrecio>();
         public ArbolSP(int tamanioMax)

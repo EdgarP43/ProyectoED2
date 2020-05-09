@@ -8,7 +8,7 @@ namespace ProyectoED2.ArbolBStar
 {
     public class ArbolProducto
     {
-        private NodoP raiz;
+        public NodoP raiz;
         private int tamanioMax;
         public List<Producto> contenidoArbol = new List<Producto>();
         public ArbolProducto(int tamanioMax)
