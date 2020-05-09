@@ -163,7 +163,6 @@ namespace ProyectoED2.Data
                 nuevo.Insertar(item);
             }
             inventario.raiz = nuevo.raiz;
-
         }
     }
 }

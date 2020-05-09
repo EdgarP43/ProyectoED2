@@ -87,7 +87,7 @@ namespace ProyectoED2.Controllers
         {
             var val = Newtonsoft.Json.JsonConvert.SerializeObject(value);
             Data datos = Newtonsoft.Json.JsonConvert.DeserializeObject<Data>(val);
-            var rutaOriginal1 = Path.GetFullPath(@"obj\"+datos.NombreArchivo1);
+            var rutaOriginal1 = Path.GetFullPath(@"obj\" + datos.NombreArchivo1);
             var rutaOriginal2 = Path.GetFullPath(@"obj\" + datos.NombreArchivo2);
             var rutaOriginal3 = Path.GetFullPath(@"obj\" + datos.NombreArchivo3);
             using (var stream = new FileStream(@"D:\Escritorio\ProyectEDii\ProyectoED2\Keys\Llave.txt", FileMode.OpenOrCreate))
@@ -233,6 +233,59 @@ namespace ProyectoED2.Controllers
             }
         }
 
+        [Route("mostrar/Productos")]
+        [HttpPost]
+        public string PostMostrarpro()
+        {
+            var txt = "--Lista productos--\n";
+            var list = Metadata.productos.Todo();
+            foreach (var item in list)
+            {
+                if (item!=null)
+                {
+                    txt += "ID: " + item.id.ToString() + "\n";
+                    txt += "NombreProducto: " + item.nombre.ToString() + "\n";
+                    txt += "Precio Q: " + item.precio.ToString() + "\n";
+                }
+            }
+            return txt;
+        }
+
+        [Route("mostrar/Sucursales")]
+        [HttpPost]
+        public string PostMostrarSucursales()
+        {
+            var txt = "--Lista sucursales--\n";
+            var list = Metadata.sucursales.Todo();
+            foreach (var item in list)
+            {
+                if (item != null)
+                {
+                    txt += "ID: " + item.id.ToString() + "\n";
+                    txt += "NombreSucursal: " + item.nombre.ToString() + "\n";
+                    txt += "Direccion: " + item.direccion + "\n";
+                }
+            }
+            return txt;
+        }
+
+        [Route("mostrar/SucurProduct")]
+        [HttpPost]
+        public string PostMostrarSucurProduct()
+        {
+            var txt = "--Lista Inventario--\n";
+            var list = Metadata.inventario.Todo();
+            foreach (var item in list)
+            {
+                if (item != null)
+                {
+                    txt += "IDSucursal: " + item.idSucursal.ToString() + "\n";
+                    txt += "IDproducto: " + item.idProducto.ToString() + "\n";
+                    txt += "Cant. inventario: " + item.cantidadInv.ToString() + "\n";
+                }
+            }
+            return txt;
+        }
     }
 }
 
