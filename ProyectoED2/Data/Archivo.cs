@@ -10,9 +10,9 @@ namespace ProyectoED2.Data
 {
     public class Archivo
     {
-        public string d1 = @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\producto.csv";
-        public string d2 = @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal-producto.csv";
-        public string d3 = @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal.csv";
+        public string d1 = @"D:\Escritorio\ProyectEDii\ProyectoED2\obj\producto.csv";
+        public string d2 = @"D:\Escritorio\ProyectEDii\ProyectoED2\obj\sucursal-producto.csv";
+        public string d3 = @"D:\Escritorio\ProyectEDii\ProyectoED2\obj\sucursal.csv";
         public ArbolProducto productos = new ArbolProducto(9);
         public ArbolSucursal sucursales = new ArbolSucursal(9);
         public ArbolSP inventario = new ArbolSP(9);
@@ -61,6 +61,7 @@ namespace ProyectoED2.Data
                     creado.nombre = sucursal[1];
                     creado.direccion = sucursal[2];
                     sucursales.Insertar(creado);
+                    rSucursal.Add(creado);
                 }
             }
         }
@@ -77,7 +78,7 @@ namespace ProyectoED2.Data
                     creado.nombre = sucursal[1];
                     creado.precio = Convert.ToDouble(sucursal[2]);
                     productos.Insertar(creado);
-
+                    rProductos.Add(creado);
                 }
             }
         }
@@ -95,6 +96,7 @@ namespace ProyectoED2.Data
                     creado.idProducto = Convert.ToInt32(sucursal[1]);
                     creado.cantidadInv = Convert.ToInt32(sucursal[2]);
                     inventario.Insertar(creado);
+                    rInventario.Add(creado);
                 }
             }
         }
@@ -102,7 +104,9 @@ namespace ProyectoED2.Data
         {
             File.Delete(d3);
             ArbolSucursal nuevo = new ArbolSucursal(9);
-            using (StreamWriter sw1 = File.CreateText(d3))
+            // using (StreamWriter sw1 = File.CreateText(d3))
+            var arch = new FileStream(d3, FileMode.OpenOrCreate);
+            arch.Close();
             foreach (var item in rSucursal)
             {
                 if (item.id == actualizar.id)
@@ -122,7 +126,8 @@ namespace ProyectoED2.Data
         {
             File.Delete(d1);
             ArbolProducto nuevo = new ArbolProducto(9);
-            using (StreamWriter sw1 = File.CreateText(d1))
+            var arch = new FileStream(d1, FileMode.OpenOrCreate);
+            arch.Close();
             foreach (var item in rProductos)
             {
                 if (item.id == actualizar.id)
@@ -143,7 +148,8 @@ namespace ProyectoED2.Data
         {
             File.Delete(d2);
             ArbolSP nuevo = new ArbolSP(9);
-            using (StreamWriter sw1 = File.CreateText(d2))
+            var arch = new FileStream(d2, FileMode.OpenOrCreate);
+            arch.Close();
             foreach (var item in rInventario)
             {
                 if ((item.idSucursal == actualizar.idSucursal) && (item.idProducto == item.idProducto))

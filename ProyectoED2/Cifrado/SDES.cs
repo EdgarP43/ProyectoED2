@@ -77,6 +77,7 @@ namespace ProyectoED2.Cifrado
 
             Key2 = Permutando(bloqueTmp, p8array);
         }
+
         public string[,] CrearSBox0()
         {
             var sbox0 = new string[4, 4] { { "01", "00", "11", "10" }, { "11", "10", "01", "00" }, { "00", "10", "01", "11" }, { "11", "01", "11", "10" } };
@@ -89,141 +90,234 @@ namespace ProyectoED2.Cifrado
             return sbox1;
         }
 
-        public void CifrarTexto(string ubicacionFile, string ubicacionDestino, Dictionary<string, string> opsDictionary, string NombreFile, string extension, string key1, string key2, string[,] sbox0, string[,] sbox1)
+        public List<byte> CifrarTexto(string ubicacionFile, Dictionary<string, string> opsDictionary, string key1, string key2, string[,] sbox0, string[,] sbox1)
         {
             var caracter = new byte();
             var binario = string.Empty;
+            List<byte> listt = new List<byte>();
             using (var stream = new FileStream(ubicacionFile, FileMode.Open))
             {
                 using (var reader = new BinaryReader(stream))
                 {
-                    using (var writeStream = new FileStream($"{ubicacionDestino}/{NombreFile}.{extension}", FileMode.OpenOrCreate))
+                    var byteBuffer = new byte[bufferLenght];
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        using (var writer = new BinaryWriter(writeStream))
-                        {
-                            var byteBuffer = new byte[bufferLenght];
+                        byteBuffer = reader.ReadBytes(bufferLenght);
 
-                            while (reader.BaseStream.Position != reader.BaseStream.Length)
+                        for (int i = 0; i < byteBuffer.Length; i++)
+                        {
+                            caracter = byteBuffer[i];
+                            binario = Convert.ToString(caracter, 2);
+                            binario = binario.PadLeft(8, '0');
+
+                            var IParray = opsDictionary["IP"];
+                            var tmpIp = Permutando(binario, IParray);
+
+                            var bloque1 = tmpIp.Substring(0, 4);
+                            var bloque2 = tmpIp.Substring(4, 4);
+
+                            var EParray = opsDictionary["EP"];
+                            var tmpEP = Permutando(bloque2, EParray);
+
+                            var XOR = string.Empty;
+                            for (int j = 0; j < key1.Length; j++)
                             {
-                                byteBuffer = reader.ReadBytes(bufferLenght);
-
-                                for (int i = 0; i < byteBuffer.Length; i++)
-                                {
-                                    caracter = byteBuffer[i];
-                                    binario = Convert.ToString(caracter, 2);
-                                    binario = binario.PadLeft(8, '0');
-
-                                    var IParray = opsDictionary["IP"];
-                                    var tmpIp = Permutando(binario, IParray);
-
-                                    var bloque1 = tmpIp.Substring(0, 4);
-                                    var bloque2 = tmpIp.Substring(4, 4);
-
-                                    var EParray = opsDictionary["EP"];
-                                    var tmpEP = Permutando(bloque2, EParray);
-
-                                    var XOR = string.Empty;
-                                    for (int j = 0; j < key1.Length; j++)
-                                    {
-                                        XOR += key1[j] ^ tmpEP[j];
-                                    }
-
-                                    var BloqueSbox0 = XOR.Substring(0, 4);
-                                    var FS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[3]));
-                                    var CS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[2]));
-                                    var ResultSB0 = sbox0[FS0, CS0];
-
-                                    var BloqueSbox1 = XOR.Substring(4, 4);
-                                    var FS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[3]));
-                                    var CS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[2]));
-                                    var ResultSB1 = sbox1[FS1, CS1];
-
-                                    var bloqueResultante = ResultSB0 + ResultSB1;
-
-                                    var P4array = opsDictionary["P4"];
-                                    var tmpP4 = Permutando(bloqueResultante, P4array);
-
-                                    var XORfinal = string.Empty;
-                                    for (int j = 0; j < tmpP4.Length; j++)
-                                    {
-                                        XORfinal += bloque1[j] ^ tmpP4[j];
-                                    }
-
-                                    var swap = bloque2 + XORfinal;
-
-                                    tmpEP = Permutando(XORfinal, EParray);
-
-                                    XOR = string.Empty;
-                                    for (int j = 0; j < key2.Length; j++)
-                                    {
-                                        XOR += tmpEP[j] ^ key2[j];
-                                    }
-
-                                    BloqueSbox0 = XOR.Substring(0, 4);
-                                    FS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[3]));
-                                    CS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[2]));
-                                    ResultSB0 = sbox0[FS0, CS0];
-
-                                    BloqueSbox1 = XOR.Substring(4, 4);
-                                    FS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[3]));
-                                    CS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[2]));
-                                    ResultSB1 = sbox1[FS1, CS1];
-
-                                    bloqueResultante = ResultSB0 + ResultSB1;
-
-                                    tmpP4 = string.Empty;
-                                    tmpP4 = Permutando(bloqueResultante, P4array);
-
-                                    XOR = string.Empty;
-                                    for (int j = 0; j < bloqueResultante.Length; j++)
-                                    {
-                                        XOR += bloque2[j] ^ tmpP4[j];
-                                    }
-
-                                    var union = XOR + XORfinal;
-
-                                    var IP1array = opsDictionary["IP1"];
-                                    var resultado = string.Empty;
-                                    for (int j = 0; j < IP1array.Length; j++)
-                                    {
-                                        resultado += union[Convert.ToInt16(Convert.ToString(IP1array[j]))];
-                                    }
-
-                                    writer.Write(Convert.ToByte(Convert.ToInt32(resultado, 2)));
-                                }
-
+                                XOR += key1[j] ^ tmpEP[j];
                             }
+
+                            var BloqueSbox0 = XOR.Substring(0, 4);
+                            var FS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[3]));
+                            var CS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[2]));
+                            var ResultSB0 = sbox0[FS0, CS0];
+
+                            var BloqueSbox1 = XOR.Substring(4, 4);
+                            var FS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[3]));
+                            var CS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[2]));
+                            var ResultSB1 = sbox1[FS1, CS1];
+
+                            var bloqueResultante = ResultSB0 + ResultSB1;
+
+                            var P4array = opsDictionary["P4"];
+                            var tmpP4 = Permutando(bloqueResultante, P4array);
+
+                            var XORfinal = string.Empty;
+                            for (int j = 0; j < tmpP4.Length; j++)
+                            {
+                                XORfinal += bloque1[j] ^ tmpP4[j];
+                            }
+
+                            var swap = bloque2 + XORfinal;
+
+                            tmpEP = Permutando(XORfinal, EParray);
+
+                            XOR = string.Empty;
+                            for (int j = 0; j < key2.Length; j++)
+                            {
+                                XOR += tmpEP[j] ^ key2[j];
+                            }
+
+                            BloqueSbox0 = XOR.Substring(0, 4);
+                            FS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[3]));
+                            CS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[2]));
+                            ResultSB0 = sbox0[FS0, CS0];
+
+                            BloqueSbox1 = XOR.Substring(4, 4);
+                            FS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[3]));
+                            CS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[2]));
+                            ResultSB1 = sbox1[FS1, CS1];
+
+                            bloqueResultante = ResultSB0 + ResultSB1;
+
+                            tmpP4 = string.Empty;
+                            tmpP4 = Permutando(bloqueResultante, P4array);
+
+                            XOR = string.Empty;
+                            for (int j = 0; j < bloqueResultante.Length; j++)
+                            {
+                                XOR += bloque2[j] ^ tmpP4[j];
+                            }
+
+                            var union = XOR + XORfinal;
+
+                            var IP1array = opsDictionary["IP1"];
+                            var resultado = string.Empty;
+                            for (int j = 0; j < IP1array.Length; j++)
+                            {
+                                resultado += union[Convert.ToInt16(Convert.ToString(IP1array[j]))];
+                            }
+
+                            listt.Add(Convert.ToByte(Convert.ToInt16(resultado, 2)));
+                            //writer.Write(Convert.ToByte(Convert.ToInt32(resultado, 2)));
                         }
+
                     }
                 }
+
+
             }
+            return listt;
         }
 
-        public string CrearArchivos(string rutaOriginal)
+
+        public List<byte> DescifrarTexto(List<byte> bytes, Dictionary<string, string> opsDictionary, string key1, string key2, string[,] sbox0, string[,] sbox1)
         {
-            var vec1 = rutaOriginal.Split("\\");
-            var vec2 = vec1[vec1.Length - 1].Split(".");
-            var destino = Path.GetFullPath("bin");
-            using (var arch = new FileStream(rutaOriginal, FileMode.OpenOrCreate))
+            var caracter = new byte();
+            var binario = string.Empty;
+            List<byte> listt = new List<byte>();
+            var byteBuffer = new byte[bufferLenght];
+            for (int i = 0; i < bytes.Count; i++)
             {
-                using (var reader = new StreamReader(arch))
+                caracter = bytes[i];
+                binario = Convert.ToString(caracter, 2);
+                binario = binario.PadLeft(8, '0');
+
+                var IParray = opsDictionary["IP"];
+                var tmpIp = Permutando(binario, IParray);
+
+                var bloque1 = tmpIp.Substring(0, 4);
+                var bloque2 = tmpIp.Substring(4, 4);
+
+                var EParray = opsDictionary["EP"];
+                var tmpEP = Permutando(bloque2, EParray);
+
+                var XOR = string.Empty;
+                for (int j = 0; j < key1.Length; j++)
                 {
-                    using (var archNuevo = new FileStream(destino.Substring(0, destino.Length - 3) + vec1[vec1.Length - 1], FileMode.OpenOrCreate))
-                    {
-                        using (var writer = new StreamWriter(archNuevo))
-                        {
-                            writer.Write(reader.ReadToEnd());
-                        }
-                    }
+                    XOR += key1[j] ^ tmpEP[j];
                 }
+
+                var BloqueSbox0 = XOR.Substring(0, 4);
+                var FS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[3]));
+                var CS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[2]));
+                var ResultSB0 = sbox0[FS0, CS0];
+
+                var BloqueSbox1 = XOR.Substring(4, 4);
+                var FS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[3]));
+                var CS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[2]));
+                var ResultSB1 = sbox1[FS1, CS1];
+
+                var bloqueResultante = ResultSB0 + ResultSB1;
+
+                var P4array = opsDictionary["P4"];
+                var tmpP4 = Permutando(bloqueResultante, P4array);
+
+                var XORfinal = string.Empty;
+                for (int j = 0; j < tmpP4.Length; j++)
+                {
+                    XORfinal += bloque1[j] ^ tmpP4[j];
+                }
+
+                var swap = bloque2 + XORfinal;
+
+                tmpEP = Permutando(XORfinal, EParray);
+
+                XOR = string.Empty;
+                for (int j = 0; j < key2.Length; j++)
+                {
+                    XOR += tmpEP[j] ^ key2[j];
+                }
+
+                BloqueSbox0 = XOR.Substring(0, 4);
+                FS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[3]));
+                CS0 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox0[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox0[2]));
+                ResultSB0 = sbox0[FS0, CS0];
+
+                BloqueSbox1 = XOR.Substring(4, 4);
+                FS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[0])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[3]));
+                CS1 = 2 * Convert.ToInt16(Convert.ToString(BloqueSbox1[1])) + 1 * Convert.ToInt16(Convert.ToString(BloqueSbox1[2]));
+                ResultSB1 = sbox1[FS1, CS1];
+
+                bloqueResultante = ResultSB0 + ResultSB1;
+
+                tmpP4 = string.Empty;
+                tmpP4 = Permutando(bloqueResultante, P4array);
+
+                XOR = string.Empty;
+                for (int j = 0; j < bloqueResultante.Length; j++)
+                {
+                    XOR += bloque2[j] ^ tmpP4[j];
+                }
+
+                var union = XOR + XORfinal;
+
+                var IP1array = opsDictionary["IP1"];
+                var resultado = string.Empty;
+                for (int j = 0; j < IP1array.Length; j++)
+                {
+                    resultado += union[Convert.ToInt16(Convert.ToString(IP1array[j]))];
+                }
+
+                listt.Add(Convert.ToByte(Convert.ToInt16(resultado, 2)));
+                //writer.Write(Convert.ToByte(Convert.ToInt32(resultado, 2)));
             }
-            return destino.Substring(0, destino.Length - 3) + vec1[vec1.Length - 1];
+            return listt;
         }
-        public void CargarArchivos(string ruta)
-        {
-            FileInfo fi = new FileInfo(ruta);
-            fi.Delete();
-        }
+
+        //public string CrearArchivos(string rutaOriginal)
+        //{
+        //    var vec1 = rutaOriginal.Split("\\");
+        //    var vec2 = vec1[vec1.Length - 1].Split(".");
+        //    var destino = Path.GetFullPath("bin");
+        //    using (var arch = new FileStream(rutaOriginal, FileMode.OpenOrCreate))
+        //    {
+        //        using (var reader = new StreamReader(arch))
+        //        {
+        //            using (var archNuevo = new FileStream(destino.Substring(0, destino.Length - 3) + vec1[vec1.Length - 1], FileMode.OpenOrCreate))
+        //            {
+        //                using (var writer = new StreamWriter(archNuevo))
+        //                {
+        //                    writer.Write(reader.ReadToEnd());
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return destino.Substring(0, destino.Length - 3) + vec1[vec1.Length - 1];
+        //}
+        //public void CargarArchivos(string ruta)
+        //{
+        //    FileInfo fi = new FileInfo(ruta);
+        //    fi.Delete();
+        //}
 
     }
 }

@@ -28,7 +28,7 @@ namespace ProyectoED2.Huffman
         public Dictionary<byte, string> CodigosPrefijoArchivoActual = new Dictionary<byte, string>();
         public Dictionary<string, byte> CodigoPD = new Dictionary<string, byte>();
         const int bufferLength = 1000;
-        public int CompresiónHuffman(string path, string[] nombreArchivo, string pathHuffman, string NombreNuevo)
+        public int CompresiónHuffman(string path, string[] nombreArchivo, string pathHuffman)
         {
             var ListaNodos = new List<Nodo>();
             var Frecuencias = new Dictionary<byte, int>();
@@ -107,7 +107,7 @@ namespace ProyectoED2.Huffman
             {
                 using (var reader = new BinaryReader(stream))
                 {
-                    using (var writeStream = new FileStream($"{pathHuffman}/{NombreNuevo}.huff", FileMode.OpenOrCreate))
+                    using (var writeStream = new FileStream($"{pathHuffman}/{nombreArchivo[0]}.huff", FileMode.OpenOrCreate))
                     {
                         using (var writer = new BinaryWriter(writeStream))
                         {

@@ -6,6 +6,8 @@ using System.IO;
 using ProyectoED2.Data;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using ProyectoED2.Cifrado;
+using ProyectoED2.Huffman;
 
 namespace ProyectoED2.Controllers
 {
@@ -13,12 +15,13 @@ namespace ProyectoED2.Controllers
     public class ValuesController : Controller
     {
         public static Archivo Metadata = new Archivo();
-        
+
         public class Data
         {
             public string NombreArchivo1 { get; set; }
             public string NombreArchivo2 { get; set; }
             public string NombreArchivo3 { get; set; }
+            public string clave { get; set; }
         }
         public class SucursalProducto
         {
@@ -57,12 +60,12 @@ namespace ProyectoED2.Controllers
         [Route("actualizar/Sucursal")]
         [HttpPost]
         public string PostSucursalNueva([FromBody] Sucursal value)
-        {        
-            var arch = new FileStream(@"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal.csv", FileMode.OpenOrCreate);
+        {
+            //var arch = new FileStream(@"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal.csv", FileMode.OpenOrCreate);
             var existe = Metadata.sucursales.Busqueda(value.id);
             if (existe)
             {
-                //Metadata.actualizarSucursales(value, @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal");
+                Metadata.actualizarSucursales(value);
                 return "Sucursal: " + value.nombre + " actualizada";
             }
             else
@@ -78,36 +81,111 @@ namespace ProyectoED2.Controllers
             Metadata.insertarProducto(value);
         }
 
-        //[Route("add/Productos")]
-        //[HttpPost]
-        //public void PostProductos([FromBody] object value)
-        //{
-        //    var val = Newtonsoft.Json.JsonConvert.SerializeObject(value);
-        //    Data datos = Newtonsoft.Json.JsonConvert.DeserializeObject<Data>(val);
-        //    var rutaOriginal = Path.GetFullPath(datos.NombreArchivo);
-        //    var arch = new FileStream(rutaOriginal, FileMode.OpenOrCreate);
-        //    var lector = new StreamReader(arch);
-        //    while (!lector.EndOfStream)
-        //    {
-        //        lector.ReadLine();
-        //        var vec = lector.ReadLine().Split(";");
-        //        Producto NuevoProducto = new Producto();
-        //        NuevoProducto.id = Convert.ToInt16(vec[0]);
-        //        NuevoProducto.nombre = vec[1];
-        //        NuevoProducto.precio = Convert.ToInt16(vec[2]);
-        //        ArbolProductos.Insertar(NuevoProducto);
-        //    }
-        //}
+        [Route("add/Productos")]
+        [HttpPost]
+        public void PostProductos([FromBody] object value)
+        {
+            var val = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+            Data datos = Newtonsoft.Json.JsonConvert.DeserializeObject<Data>(val);
+            var rutaOriginal1 = Path.GetFullPath(@"obj\"+datos.NombreArchivo1);
+            var rutaOriginal2 = Path.GetFullPath(@"obj\" + datos.NombreArchivo2);
+            var rutaOriginal3 = Path.GetFullPath(@"obj\" + datos.NombreArchivo3);
+            using (var stream = new FileStream(@"D:\Escritorio\ProyectEDii\ProyectoED2\Keys\Llave.txt", FileMode.OpenOrCreate))
+            {
+                using (var reader = new StreamWriter(stream))
+                {
+                    reader.Write(datos.clave);
+                }
+            }
+            SDES modeloSdes1 = new SDES();
+            var OpsDic = modeloSdes1.LeerOperaciones(@"D:\Escritorio\ProyectEDii\ProyectoED2\Keys\Oper.txt");
+            var binaryKey = string.Empty;
+            modeloSdes1.VerificarLLave(datos.clave, ref binaryKey);
+            var key1 = string.Empty;
+            var key2 = string.Empty;
+            var sbox0 = modeloSdes1.CrearSBox0();
+            var sbox1 = modeloSdes1.CrearSBox1();
+            modeloSdes1.GenerarLlaves(OpsDic, binaryKey, ref key1, ref key2);
+            var bytesCifrados = modeloSdes1.CifrarTexto(rutaOriginal1, OpsDic, key1, key2, sbox0, sbox1);
+            key1 = string.Empty;
+            key2 = string.Empty;
+            modeloSdes1.GenerarLlaves(OpsDic, binaryKey, ref key1, ref key2);
+            var bytesDecifrados = modeloSdes1.DescifrarTexto(bytesCifrados, OpsDic, key1, key2, sbox0, sbox1);
+            var vec1 = rutaOriginal1.Split(@"\");
+            var vec2 = vec1[vec1.Length - 1].Split(".");
+            var pathHuffman = Path.GetFullPath("Archivos Cifrados//");
+            using (var stream = new FileStream(pathHuffman + vec1[vec1.Length - 1], FileMode.OpenOrCreate))
+            {
+                using (var reader = new BinaryWriter(stream))
+                {
+                    foreach (var item in bytesDecifrados)
+                    {
+                        reader.Write(item);
+                    }
+                }
+            }
+            var pathHuffman2 = Path.GetFullPath("Archivos Comprimidos//");
+            Huffman.Huffman.Instancia.CompresiónHuffman(pathHuffman + vec1[vec1.Length - 1], vec2, pathHuffman2);
+            //arch2
+            SDES modeloSdes2 = new SDES();
+            key1 = string.Empty;
+            key2 = string.Empty;
+            modeloSdes2.GenerarLlaves(OpsDic, binaryKey, ref key1, ref key2);
+            var bytesCifrados2 = modeloSdes2.CifrarTexto(rutaOriginal2, OpsDic, key1, key2, sbox0, sbox1);
+            key1 = string.Empty;
+            key2 = string.Empty;
+            modeloSdes2.GenerarLlaves(OpsDic, binaryKey, ref key1, ref key2);
+            var bytesDecifrados2 = modeloSdes2.DescifrarTexto(bytesCifrados2, OpsDic, key1, key2, sbox0, sbox1);
+            var vec12 = rutaOriginal2.Split(@"\");
+            var vec22 = vec12[vec12.Length - 1].Split(".");
+            var pathHuffman20 = Path.GetFullPath("Archivos Cifrados//");
+            using (var stream = new FileStream(pathHuffman20 + vec12[vec12.Length - 1], FileMode.OpenOrCreate))
+            {
+                using (var reader = new BinaryWriter(stream))
+                {
+                    foreach (var item in bytesDecifrados2)
+                    {
+                        reader.Write(item);
+                    }
+                }
+            }
+            var pathHuffman22 = Path.GetFullPath("Archivos Comprimidos//");
+            Huffman.Huffman.Instancia.CompresiónHuffman(pathHuffman20 + vec12[vec12.Length - 1], vec22, pathHuffman22);
+            //arch3
+            SDES modeloSdes3 = new SDES();
+            key1 = string.Empty;
+            key2 = string.Empty;
+            modeloSdes3.GenerarLlaves(OpsDic, binaryKey, ref key1, ref key2);
+            var bytesCifrados23 = modeloSdes3.CifrarTexto(rutaOriginal3, OpsDic, key1, key2, sbox0, sbox1);
+            key1 = string.Empty;
+            key2 = string.Empty;
+            modeloSdes3.GenerarLlaves(OpsDic, binaryKey, ref key1, ref key2);
+            var bytesDecifrados23 = modeloSdes3.DescifrarTexto(bytesCifrados23, OpsDic, key1, key2, sbox0, sbox1);
+            var vec13 = rutaOriginal3.Split(@"\");
+            var vec23 = vec13[vec13.Length - 1].Split(".");
+            var pathHuffman3 = Path.GetFullPath("Archivos Cifrados//");
+            using (var stream = new FileStream(pathHuffman3 + vec13[vec13.Length - 1], FileMode.OpenOrCreate))
+            {
+                using (var reader = new BinaryWriter(stream))
+                {
+                    foreach (var item in bytesDecifrados23)
+                    {
+                        reader.Write(item);
+                    }
+                }
+            }
+            var pathHuffman23 = Path.GetFullPath("Archivos Comprimidos//");
+            Huffman.Huffman.Instancia.CompresiónHuffman(pathHuffman3 + vec13[vec13.Length - 1], vec23, pathHuffman23);
+        }
 
         [Route("actualizar/Producto")]
         [HttpPost]
         public string PostProductoNuevo([FromBody] Producto value)
         {
-            var arch = new FileStream(@"D:\Escritorio\ProyecEDII\ProyectoED2\obj\producto.csv", FileMode.OpenOrCreate);
             var existe = Metadata.productos.Busqueda(value.id);
             if (existe)
             {
-                //Metadata.actualizarProducto(value, @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\producto");
+                Metadata.actualizarProducto(value);
                 return "Producto: " + value.nombre + " actualizado";
             }
             else
@@ -143,12 +221,11 @@ namespace ProyectoED2.Controllers
         [HttpPost]
         public string PostSucPrecio([FromBody]SucursalPrecio value)
         {
-            var arch = new FileStream(@"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal-producto.csv", FileMode.OpenOrCreate);
             var existe = Metadata.inventario.Busqueda(value.idSucursal, value.idProducto);
             if (existe)
             {
-                //Metadata.actualizarInventarioQty(value, @"D:\Escritorio\ProyecEDII\ProyectoED2\obj\sucursal-producto");
-                return "Sucursal: " + value.idSucursal+" IDproducto: "+value.idProducto + " actualizada";
+                Metadata.actualizarInventarioQty(value);
+                return "Sucursal: " + value.idSucursal + " IDproducto: " + value.idProducto + " actualizada";
             }
             else
             {
@@ -158,3 +235,4 @@ namespace ProyectoED2.Controllers
 
     }
 }
+
